@@ -18,6 +18,7 @@ Repo này được xây dựng để thực hiện các bài lab của môn NLP&
 
 ## Cấu trúc thư mục
 
+```plaintext
 project_root/
 │
 ├── src/ # Mã nguồn chính
@@ -45,3 +46,4 @@ project_root/
 │
 ├── requirements.txt # Các thư viện cần thiết
 └── README.md # Tài liệu mô tả repo
+```
