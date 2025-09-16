@@ -27,21 +27,21 @@ project_root/
 │ │
 │ ├── preprocessing/ # Các tác vụ tiền xử lý văn bản: tokenizer, vectorizer, ...
 │ │ ├── simple_tokenizer.py
-│ │ └── regex_tokenizer.py  
+│ │ └── regex_tokenizer.py
 │ │
-│ ├── representations/ # Biểu diễn văn bản
-| | └── count_vectorizer.py ....  
+│ └── representations/ # Biểu diễn văn bản
+│ └── count_vectorizer.py
 │
 ├── data/ # Thư mục chứa dữ liệu
-|
+│
 ├── tests/ # Các script kiểm thử cho từng lab
-| └── labn_test.py ....  
-|
+│ └── labn_test.py # Ví dụ: lab1_test.py, lab2_test.py ...
+│
 ├── logging/ # Log file kết quả test
-| └── labn_test.log ....
-|
+│ └── labn_test.log # Ví dụ: lab1_test.log, lab2_test.log ...
+│
 ├── report/ # Báo cáo chi tiết của từng tuần
-│ └── Report.md  
-|  
+│ └── Report.md
+│
 ├── requirements.txt # Các thư viện cần thiết
 └── README.md # Tài liệu mô tả repo
