@@ -1,0 +1,21 @@
+Simple Tokenizer Results:
+Original: Hello, world! This is a test.
+Tokenized: ['hello', ',', 'world', '!', 'this', 'is', 'a', 'test', '.']
+Original: NLP is fascinating... isn't it?
+Tokenized: ['nlp', 'is', 'fascinating', '.', '.', '.', 'isn', "'", 't', 'it', '?']
+Original: Let's see how it handles 123 numbers and punctuation!
+Tokenized: ['let', "'", 's', 'see', 'how', 'it', 'handles', '123', 'numbers', 'and', 'punctuation', '!']
+
+Regex Tokenizer Results:
+Original: Hello, world! This is a test.
+Tokenized: ['hello', ',', 'world', '!', 'this', 'is', 'a', 'test', '.']
+Original: NLP is fascinating... isn't it?
+Tokenized: ['nlp', 'is', 'fascinating', '.', '.', '.', 'isn', "'", 't', 'it', '?']
+Original: Let's see how it handles 123 numbers and punctuation!
+Tokenized: ['let', "'", 's', 'see', 'how', 'it', 'handles', '123', 'numbers', 'and', 'punctuation', '!']
+
+Tokenizing Sample Text from UD_English-EWT
+Original Sample: Al-Zaman : American forces killed Shaikh Abdullah al-Ani, the preacher at the
+mosque in the town of 
+SimpleTokenizer Output (first 20 tokens): ['al', '-', 'zaman', ':', 'american', 'forces', 'killed', 'shaikh', 'abdullah', 'al', '-', 'ani', ',', 'the', 'preacher', 'at', 'the', 'mosque', 'in', 'the']
+RegexTokenizer Output (first 20 tokens): ['al', '-', 'zaman', ':', 'american', 'forces', 'killed', 'shaikh', 'abdullah', 'al', '-', 'ani', ',', 'the', 'preacher', 'at', 'the', 'mosque', 'in', 'the']

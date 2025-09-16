@@ -1,4 +1,4 @@
-from core.interfaces import Tokenizer
+from src.core.interfaces import Tokenizer
 from typing import List
 import re
 
