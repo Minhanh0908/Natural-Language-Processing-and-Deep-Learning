@@ -2,3 +2,6 @@
 env/
 #Python cache and bytecode
 __pycache__/
+# Data files
+data/*.json
+data/glove.2024.wikigiga.50d/*
