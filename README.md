@@ -4,6 +4,7 @@ Repo này được xây dựng để thực hiện các bài lab của môn NLP&
 
 - **Lab 1:** Tokenizer cơ bản (_SimpleTokenizer, RegexTokenizer_)
 - **Lab 2:** CountVectorizer (_Bag-of-Words_) để biểu diễn văn bản dưới dạng vector số
+- **Lab 4:** Word Embedding - biểu diễn từ dưới dạng dense-vector (Word2Vec)
 
 ---
 
@@ -44,6 +45,9 @@ project_root/
 ├── report/ # Báo cáo chi tiết của từng tuần
 │ └── Report.md
 │
+├── results/
+|  └── word2vec_ewt.model.md #Kết quả train Word2Vec gensim với dữ liệu UDT
+|
 ├── requirements.txt # Các thư viện cần thiết
 └── README.md # Tài liệu mô tả repo
 ```
