@@ -222,3 +222,138 @@
   ('the', 'DT'),
   ('mat', 'NN')]"
 - Nhận xét: cùng là từ "sit" nhưng câu 1 dự đoán sai do chưa xử lý đưa từ về dạng root form.
+
+# 4. Named Entity Recogniton với RNN
+
+## 4.1 Tổng quản
+
+- Xây dựng mô hình RNN cho bài toán nhận diện thực thể có tên (NER)
+- **File code**: `notebook/lab5_rnn_for_ner.ipynb`
+
+## 4.2 Các bước thực hiện
+
+**Bước 1: Tải và tiền xử lý dữ liệu:**
+
+- Chuẩn bị bộ dữ liệu CoNLL 2003 theo định dạng IOB để huấn luyện mô hình NER.
+- Sử dụng `datasets.load_dataset("conll2003")` để tải dữ liệu train, validation, test.
+- Trích xuất các câu (`tokens`) và nhãn (`ner_tags`) từ bộ dữ liệu.
+- Chuyển các nhãn số thành chuỗi nhãn (B-LOC, I-PER,..) để dễ xử lý.
+- Xây dựng từ điển:
+  - `word_to_ix`: ánh xạ mỗi từ sang chỉ số, bao gồm token đặc biệt `<PAD>` = 0 và `<UNK>` = 1.
+  - `tag_to_ix`: ánh xạ từng nhãn NER sang chỉ số.
+- Kết quả:
+  - vocab_size = 23625, output_size = 9 (các nhãn NER).
+  - Ví dụ word_to_ix: [('<PAD>', 0), ('<UNK>', 1), ('EU', 2), ('rejects', 3), ('German', 4), ('call', 5), ('to', 6), ('boycott', 7), ('British', 8), ('lamb', 9)]
+  - Ví dụ tag_to_ix: {'B-LOC': 0, 'B-MISC': 1, 'B-ORG': 2, 'B-PER': 3, 'I-LOC': 4, 'I-MISC': 5, 'I-ORG': 6, 'I-PER': 7, 'O': 8}
+    **Bước 2: Tạo PyTorch Dataset và DataLoader**
+- Chuyển dữ liệu thành dạng tensor và batch để huấn luyện
+- Định nghĩa lớp `NERDataset` kế thừa `torch.utils.data.Dataset`:
+  - `__getitem__` trả về cặp `(sentence_indicies, tag_indices)` cho mỗi câu.
+  - Sử dụng `<UNK>` cho từ chưa xuất hiện trong từ điển.
+- Hàm `collate_fn`:
+  - Đệm các câu về cùng độ dài batch với `pad_sequence`
+  - Đệm nhãn với giá trị `-1` để CrossEntropyLoss có thể bỏ qua các token padding.
+- Khởi tạo DataLoader cho train, validition và test: `train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, collate_fn=collate_fn)`
+- Ví dụ 1 batch trong train:
+  Sentences:
+  tensor([[10295,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+        [ 1728,  1584,  8945,  8941,    18,    41,  6347,    57,  8943,   121,
+           163,  8944,    89,   237,  8946,   237,  5134,   163,  3195,    10],
+        [18394,   712,  3149, 15722, 15271, 15386, 14974, 15714,     0,     0,
+             0,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+        [ 8992,  1601, 18600, 18617,   511,    23,   258, 23056, 10039,    72,
+           203,  1285, 23057,   500, 14433,   512,  5474,    10,     0,     0]])
+  Tags:
+  tensor([[8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+         -1, -1],
+        [ 8,  8,  3,  7,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+          0,  8],
+        [ 2,  8,  8,  8,  8,  8,  8,  8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+         -1, -1],
+        [ 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+         -1, -1]])
+  **Bước 3: Xây dựng Mô hình RNN**
+- Dự đoán nhãn NER cho từng token.
+- Cấu trúc mô hình `RNNForNER`:
+  - Embedding Layer: Chuyển chỉ số từ thành vector nhúng `self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=0)`
+  - LSTM Layer: Mạng LSTM hai chiều xử lý chuỗi vector `self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_dim, batch_first=True, bidirectional=True)`
+  - Fully Connected Layer: Chiếu output LSTM sang không gian nhãn NER `self.fc = nn.Linear(hidden_dim * 2, output_size)`
+- Forwad pass:
+
+```python
+embeds = self.embedding(x)           # [batch, seq_len, embedding_dim]
+lstm_out, _ = self.lstm(embeds)      # [batch, seq_len, hidden_dim*2]
+logits = self.fc(lstm_out)           # [batch, seq_len, output_size]
+```
+
+**Bước 4: Huấn luyện mô hình:**
+
+- Huấn luyện mô hình dự đoán nhãn token
+- Khởi tạo:
+  - model: `RNNForNER(vocab_size, embedding_dim, hidden_dim, output_size)`
+  - optimizer: `Adam(model.parameters())`
+  - loss function: `nn.CrossEntropyLoss(ignore_index=-1)`
+- Vòng lặp:
+  - Lặp qua số epoch
+  - Với mỗi batch: forward pass -> tính loss -> backward pass -> update weights.
+  - In ra loss trung bình mỗi epoch.
+- Kết quả: sau 5 epoch
+  Epoch [1/5] - Loss: 0.3822
+  Epoch [2/5] - Loss: 0.1296
+  Epoch [3/5] - Loss: 0.0495
+  Epoch [4/5] - Loss: 0.0174
+  Epoch [5/5] - Loss: 0.0075
+  -> loss giảm dần cho thấy mô hình đang hội tụ tốt.
+
+**Bước 5: Đánh giá Mô hình**
+
+- Đánh giá độ chính xác và chất lượng dự đoán
+- Hàm `evaluate`: tính accuracy chỉ trên các token không phải padding.
+- Hàm `evaluate_seqeval`: sử dụng thư viện để tính precision, recall, f1-score theo entity-level.
+- Hàm `predict_sentence`: Chuyển câu mỗi thành tensor, dự đoán nhãn, in ra token -> predicted_tag.
+- Kết quả trên tập validation:
+
+  - Validation Accuracy: 0.9565
+    precision recall f1-score support
+
+            LOC     0.8363    0.8508    0.8435      1837
+            MISC     0.7807    0.7527    0.7664       922
+            ORG     0.7612    0.6726    0.7142      1341
+            PER     0.6944    0.7980    0.7426      1842
+
+    micro avg 0.7639 0.7790 0.7714 5942
+    macro avg 0.7681 0.7686 0.7667 5942
+    weighted avg 0.7667 0.7790 0.7711 5942
+
+- Kết quả trên tập test:
+
+  - Test Accuracy: 0.9352
+    precision recall f1-score support
+
+            LOC     0.7898    0.7794    0.7846      1668
+            MISC     0.6277    0.6197    0.6237       702
+            ORG     0.7022    0.5792    0.6348      1661
+            PER     0.5814    0.7285    0.6467      1617
+
+    micro avg 0.6757 0.6861 0.6808 5648
+    macro avg 0.6753 0.6767 0.6724 5648
+    weighted avg 0.6842 0.6861 0.6810 5648
+
+- Ví dụ dự đoán câu mới:
+  - Câu: "VNU University is located in Hanoi"
+  - Dự đoán:
+    VNU → B-ORG
+    University → I-ORG
+    is → O
+    located → O
+    in → O
+    Hanoi → B-LOC
+
+## 4.3 Nhận xét
+
+- Mô hình BiLSTM cho bài toán NER trên bộ dữ liệu ConLL 2003 đã đạt độ chính xác cao trên tập validation (95.65%) và test (93.52%), cho thấy khả năng học tốt các mẫu ngữ cảnh trong bài toán gán nhãn thực thể.
+- Các loại thực thể Địa điểm (LOC) và Tổ chức (ORG) có điểm F1 cao nhất, phản ánh rằng các thực thể này thường có ngữ cảnh rõ ràng, dễ nhận diện.
+- Ngược lại, nhãn PER (Person) và MISC (Miscellaneous) có F1 thấp hơn, do thường xuất hiện ít hơn và đa dạng về dạng viết, khiến mô hình khó tổng quát.
+- Khoảng cách giữa kết quả trên validation và test (≈ 2%) là chấp nhận được, chứng tỏ mô hình tổng quát hóa tương đối tốt, không bị overfitting đáng kể.
+- Kết quả dự đoán ví dụ mới cho thấy mô hình nhận diện đúng thực thể “VNU University” (B-ORG, I-ORG) và “Hanoi” (B-LOC), minh chứng rằng mô hình có thể áp dụng tốt cho các câu chưa từng thấy.
