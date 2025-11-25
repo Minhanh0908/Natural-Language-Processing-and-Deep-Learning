@@ -4,7 +4,10 @@ Repo này được xây dựng để thực hiện các bài lab của môn NLP&
 
 - **Lab 1:** Tokenizer cơ bản (_SimpleTokenizer, RegexTokenizer_)
 - **Lab 2:** CountVectorizer (_Bag-of-Words_) để biểu diễn văn bản dưới dạng vector số
-- **Lab 4:** Word Embedding - biểu diễn từ dưới dạng dense-vector (Word2Vec)
+- **Lab 3:** Word Embedding - biểu diễn từ dưới dạng dense-vector (Word2Vec)
+- **Lab 4:** Text classification - phân loại văn bản bằng pipeline sử dụng các kỹ thuật tiền xử lý từ các lab trước, sử dụng các model học máy đơn giản.
+- **Lab 5:** RNNs và các bài toán: Sử dụng các mô hình RNNs, LSTMs và GRUs để giải quyết các bài toán token classification, POS và NER.
+- **Lab 6:** Introduction to Transformers: sử dụng các mô hình pretrained Transformer để thực hiện các tác vụ NLP cơ bản.
 
 ---
 
@@ -32,17 +35,20 @@ project_root/
 │ │ └── regex_tokenizer.py
 │ │
 │ └── representations/ # Biểu diễn văn bản
-│ └── count_vectorizer.py
-│
+│ |  └── count_vectorizer.py
+| |
+│ └── models/ # Các mô hình
 ├── data/ # Thư mục chứa dữ liệu
 │
+├── notebook/ # Các file notebook
+|
 ├── tests/ # Các script kiểm thử cho từng lab
 │ └── labn_test.py # Ví dụ: lab1_test.py, lab2_test.py ...
 │
 ├── logging/ # Log file kết quả test
 │ └── labn_test.log # Ví dụ: lab1_test.log, lab2_test.log ...
 │
-├── report/ # Báo cáo chi tiết của từng tuần
+├── report/ # Báo cáo chi tiết cho từng lab
 │ └── Report.md
 │
 ├── results/
